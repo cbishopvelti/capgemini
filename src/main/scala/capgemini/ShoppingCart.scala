@@ -2,17 +2,20 @@ package capgemini
 
 import java.lang.RuntimeException
 
-class Item (val name: String, val price: BigDecimal) {}
+// getOneFree is the number of items in buy x get 1 free rule.
+class Item (val name: String, val price: BigDecimal, val getOneFree: Option[Integer] ) {}
 
 object Item {
-	def apply (name: String, price: BigDecimal): Item = new Item(name, price)
+	def apply (name: String, price: BigDecimal): Item = new Item(name, price, None)
+	def apply (name: String, price: BigDecimal, getOneFree: Option[Integer]): Item = new Item(name, price, getOneFree)
 }
 
 object ShoppingCart {
 
+	// Could use enums here to ensure type safty.
 	val items: Map[String, Item] = Map(
-		"Apple" -> Item("Apple", BigDecimal("0.60")),
-		"Orange" -> Item("Orange", BigDecimal("0.25"))
+		"Apple" -> Item("Apple", BigDecimal("0.60"), Some(2)),
+		"Orange" -> Item("Orange", BigDecimal("0.25"), Some(3))
 	)
 
 	def main(args: Array[String]): Unit = {
@@ -37,7 +40,7 @@ object ShoppingCart {
 
 		cartTyped match {
 			case None => None
-			case Some(items) => Some(_calculatePrice(items))
+			case Some(items) => Some(_calculatePriceWithDiscount(items))
 		}
 	}
 
@@ -63,15 +66,32 @@ object ShoppingCart {
 	}
 
 	/**
-	Sums the list of items.
-	Arguably the simplest possible solution for 'Step 1'
+	Calculates the price, applying a buy x get 1 free rule.
 	*/
-	def _calculatePrice (cart: List[Item]): BigDecimal = {
+	def _calculatePriceWithDiscount (cart: List[Item]): BigDecimal = {
+		var groupedItems: Map[String, List[Item]] = cart.groupBy(item => item.name)
 
-		val cartPrice: BigDecimal = cart.foldRight[BigDecimal](BigDecimal("0.0")) {
-			(item, a) => item.price + a
+		var groudpItems2: Iterable[BigDecimal] = groupedItems.map({ case (key, theItems) => 
+
+			// Set the x get one free value
+			val tItem = items.get(key) match {
+				case Some(value) => value
+				// Shouldn't happen, as we have allready validated for this case.
+				case None => throw new RuntimeException("No value")
+			}
+
+			// Calculate the number of items to charge for
+			val noOfItems = tItem.getOneFree match {
+				case None => theItems.length
+				case Some(getOneFree) => theItems.length - (theItems.length / getOneFree)
+			}
+
+			val priceForItems = noOfItems * tItem.price
+			priceForItems
+		})
+
+		groudpItems2.foldRight[BigDecimal](BigDecimal("0.0")) {
+			(item, a) => item + a
 		}
-
-		return cartPrice
 	}
 }

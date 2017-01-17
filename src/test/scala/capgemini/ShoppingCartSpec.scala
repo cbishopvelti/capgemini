@@ -18,6 +18,14 @@ class ShoppingCartSpec extends Specification {
 	[Apple, Orange] shopping cart should return 0.85 	$appleOrangeShoppingCart
 
 	Invalid shopping cart should return None	$invalidShoppingCart
+
+	[Apple, Apple] should return 0.60			$appleDiscount
+
+	[Apple, Apple, Apple] should discount 1 returning 1.20	$appleDiscount3
+
+	[Orange, Orange, Orange] should discount 1 returning 0.50	$orangeDiscount
+
+	[Orange, Orange, Orange, Orange] should discount 1 returning 0.75	$orangeDiscount4
 	"""
 
 	def emptyShoppingCart = {
@@ -38,6 +46,20 @@ class ShoppingCartSpec extends Specification {
 
 	def invalidShoppingCart = {
 		ShoppingCart.cacluratePriceInput(List("Banana")) must beEqualTo(None)
+	}
+
+	def appleDiscount = {
+		ShoppingCart.cacluratePriceInput(List("Apple", "Apple")) must beEqualTo(Some(BigDecimal("0.60")))
+	}
+	def appleDiscount3 = {
+		ShoppingCart.cacluratePriceInput(List("Apple", "Apple", "Apple")) must beEqualTo(Some(BigDecimal("1.20")))
+	}
+
+	def orangeDiscount = {
+		ShoppingCart.cacluratePriceInput(List("Orange", "Orange", "Orange")) must beEqualTo(Some(BigDecimal("0.50")))
+	}
+	def orangeDiscount4 = {
+		ShoppingCart.cacluratePriceInput(List("Orange", "Orange", "Orange", "Orange")) must beEqualTo(Some(BigDecimal("0.75")))
 	}
 }
 
