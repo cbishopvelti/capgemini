@@ -15,6 +15,17 @@ object ShoppingCart {
 		"Orange" -> Item("Orange", BigDecimal("0.25"))
 	)
 
+	def main(args: Array[String]): Unit = {
+		while(true){
+			println("Please enter the checkout items as a comma seperate list ie 'Apple, Orange'")
+			val ln = readLine()
+			val ln2 = ln.replaceAll(" ", "")
+			val items = ln2.split(",").toList;
+			val price = cacluratePriceInput(items);
+			println(price);
+		}
+	}
+
 	/**
 	Takes a list of items as string which can include "Apple" or "Orange"
 	Performes validation to ensure that the list only contains "Apple" or "Orange"
